@@ -48,25 +48,25 @@ Returns the last replica-side error text, or 'NULL'.
 
 Linux:
 
-'''bash
+```bash
 gcc -fPIC -shared resqlite.c -o resqlite.so -lsqlite3
-'''
+```
 
 macOS:
 
-'''bash
+```bash
 gcc -fPIC -dynamiclib resqlite.c -o resqlite.dylib -lsqlite3
-'''
+```
 
 Windows (MinGW example):
 
-'''bash
+```bash
 gcc -shared resqlite.c -o resqlite.dll -lsqlite3
-'''
+```
 
 ## Example use in sqlite3 CLI
 
-'''sql
+```sql
 .load ./resqlite
 SELECT resqlite_add_replica('replica.db', 1);
 
@@ -78,7 +78,7 @@ COMMIT;
 
 SELECT resqlite_status();
 SELECT resqlite_last_error();
-'''
+```
 
 ## Notes
 

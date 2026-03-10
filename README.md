@@ -80,9 +80,7 @@ SELECT resqlite_status();
 SELECT resqlite_last_error();
 ```
 
-## Notes
-
-If you want stronger guarantees than a loadable extension can provide, the next step is usually one of these:
+## TBD
 
 - embed SQLite in an application wrapper and replicate before/after statement execution there,
 - use the session/changeset API with a stricter apply pipeline,

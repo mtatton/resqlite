@@ -2,6 +2,8 @@
 
 'resqlite' is a SQLite loadable extension that mirrors each **successful top-level write statement** from a source connection to one or more replica SQLite databases.
 
+[Donate](https://www.paypal.com/ncp/payment/KDNN5CHG4C3RN)
+
 ## What it does
 
 - Replays successful top-level write statements to each replica.

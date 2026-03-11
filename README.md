@@ -32,17 +32,8 @@ Adds a replica.
 
 Returns the number of configured replicas.
 
-### 'resqlite_remove_all()'
-Disconnects all replicas.
-
-### 'resqlite_exec_on_replicas(sql)'
-Runs SQL only on replicas. Useful for one-off housekeeping.
-
 ### 'resqlite_status()'
 Returns a text status summary.
-
-### 'resqlite_last_error()'
-Returns the last replica-side error text, or 'NULL'.
 
 ## Build
 

@@ -1,39 +1,77 @@
 # resqlite
 
-'resqlite' is a SQLite loadable extension that mirrors each **successful top-level write statement** from a source connection to one or more replica SQLite databases.
+`resqlite` is a SQLite loadable extension for mirroring top-level write statements from one SQLite connection to one or more replica SQLite databases.
+
+It is a small, practical approach built on SQLite hooks. It is not a distributed database, a conflict-resolution layer, or a full replication system.
 
 [Donate](https://paypal.me/michtatton)
 
 ## What it does
 
-- Replays successful top-level write statements to each replica.
-- Mirrors explicit transaction control ('BEGIN', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'RELEASE') so multi-statement transactions stay aligned.
-- Can snapshot the source database into a new replica when you add it.
+- Captures top-level write statements issued on the primary connection.
+- Queues captured writes during a transaction and replays them to each configured replica at commit time.
+- Mirrors ordinary write workloads to one or more file-backed SQLite databases.
+- Exposes simple SQL functions to add replicas, enable or disable mirroring, inspect status, and clear the last error.
 
 ## Important limits
 
-This is a practical loadable-extension approach, not a full distributed replication engine.
+This extension deliberately keeps the design small. That also means there are important constraints:
 
-- It mirrors **top-level statements**, not internal trigger subprogram traces. If the replica schema matches the source, replica triggers fire naturally.
-- If a replica write fails during an **explicit transaction**, 'resqlite' marks the transaction as failed and aborts the source 'COMMIT', causing the source transaction to roll back.
-- If a replica write fails during a single **autocommit** statement, the source statement has already succeeded, so the extension cannot retroactively undo it.
-- Replica databases should have the same SQLite version/features and stay under exclusive control of 'resqlite'.
-- This extension is aimed at ordinary file-backed SQLite databases, not exotic VFS setups or cross-version conflict resolution.
+- It mirrors top-level statements, not internal trigger subprogram traces. If the replica schema matches the source schema, replica-side triggers run naturally when the mirrored statements are applied.
+- Writes are captured at SQLite statement-trace time, before execution fully completes. If a write inside an explicit transaction later fails, queued SQL may still remain and can cause the final `COMMIT` to fail.
+- If replication fails during an explicit transaction, `resqlite` aborts the source `COMMIT`, which causes the source transaction to roll back.
+- If replication fails for a single autocommit write, the source write has already succeeded and cannot be undone retroactively.
+- Nested transaction control is not supported. In practice, that means `SAVEPOINT`, `RELEASE`, and `ROLLBACK TO` should be avoided.
+- Connection-local statements such as `ATTACH` and `DETACH` are not mirrored safely and should not be used while mirroring is enabled.
+- Replica databases should use a compatible SQLite version and should remain under the exclusive control of `resqlite`.
+- Adding a replica does not clone the primary database. The replica should already have a compatible schema and baseline data if you expect immediate consistency.
+- This extension is intended for ordinary file-backed SQLite databases, not exotic VFS setups, cross-version replication, or multi-writer conflict resolution.
 
 ## SQL functions
 
-### 'resqlite_add_replica(path [, snapshot])'
-Adds a replica.
+### `resqlite_add_replica(path)`
 
-- 'path': target database path.
-- 'snapshot': default '1'.
-  - '1': overwrite/snapshot replica from the current source database before live mirroring starts.
-  - '0': open the existing replica as-is.
+Adds a replica database.
+
+- `path`: path to the replica SQLite database file.
 
 Returns the number of configured replicas.
 
-### 'resqlite_status()'
-Returns a text status summary.
+Notes:
+
+- The replica database is opened with read/write access and created if it does not already exist.
+- This function does not snapshot or copy the current primary database into the replica.
+
+### `resqlite_enable()`
+
+Installs the required SQLite hooks on the current connection and enables mirroring.
+
+Returns `ok` on success.
+
+### `resqlite_disable()`
+
+Disables mirroring, removes installed hooks, clears any queued statements, and closes configured replica handles.
+
+Returns `ok`.
+
+### `resqlite_clear_error()`
+
+Clears the last stored replication error.
+
+Returns `ok`.
+
+### `resqlite_status()`
+
+Returns a JSON status string with the current extension state.
+
+The payload includes:
+
+- `enabled`
+- `installed`
+- `replicas`
+- `queued`
+- `unsupported_txn_seen`
+- `last_error`
 
 ## Build
 

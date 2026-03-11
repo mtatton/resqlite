@@ -2,8 +2,8 @@
 .load ./resqlite sqlite3_resqlite_init
 
 -- configure two replica files
-SELECT resqlite_add_replica('replica1.db');
-SELECT resqlite_add_replica('replica2.db');
+SELECT resqlite_add_replica('/mnt/inta01/replica1.db');
+SELECT resqlite_add_replica('/mnt/intb01/replica2.db');
 
 -- turn replication on
 SELECT resqlite_enable();

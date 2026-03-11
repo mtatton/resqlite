@@ -9,14 +9,7 @@ SQLITE_EXTENSION_INIT1
 /*
   resqlite v0.0.1
 
-  Conservative patch release over the original prototype.
-
-  Fixes included here:
-    - Correctly ignores SQLite TRACE_STMT trigger substatements.
-    - Reliably flags SAVEPOINT / RELEASE / ROLLBACK TO before readonly checks.
-    - Reliably flags ATTACH / DETACH before readonly checks.
-    - resqlite_status() now returns valid JSON.
-    - Versioned shared-library init aliases are exported for easier loading.
+  2026 @ mtatton - donationware
 
   Important limitation that remains:
     - Statements are still captured at SQLITE_TRACE_STMT time, before execution.

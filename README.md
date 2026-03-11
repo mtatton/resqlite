@@ -80,7 +80,7 @@ import apsw
 
 for path in ("primary.db", "replica.db"):
     try:
-        os.remove(path)
+        print(path)
     except FileNotFoundError:
         pass
 

@@ -101,6 +101,8 @@ rows = list(replica.execute("SELECT id, name FROM users ORDER BY id"))
 print(rows)
 ```
 
+php example:
+
 ```php
 <?php
 
